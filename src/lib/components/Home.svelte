@@ -138,7 +138,7 @@
     </div>
 
     <div class="flex flex-row">
-      <button onclick={add_insn}><X /></button>
+      <button onclick={add_insn}><X class="x-insn" /></button>
       <button onclick={add_insn}><ArrowLeftRight /></button>
       <button onclick={add_insn}><Ampersand /></button>
       <button onclick={add_insn}><SplinePointer /></button>
