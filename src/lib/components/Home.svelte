@@ -8,46 +8,17 @@
       "operator": "x",
       "relative": null,
       "absolute": null,
-      "value": 0
-    },
-    {
-      "operator": "m",
-      "relative": 3,
-      "absolute": null,
-      "value": null
-    },
-    {
-      "operator": "a",
-      "relative": null,
-      "absolute": 4,
-      "value": null
-    },
-    {
-      "operator": "m",
-      "relative": 3,
-      "absolute": null,
-      "value": null
-    },
-    {
-      "operator": "x",
-      "relative": null,
-      "absolute": null,
       "value": 1
-    },
-    {
-      "operator": "m",
-      "relative": 1,
-      "absolute": null,
-      "value": null
-    },
+    }
   ]);
-  let c2c = $state([0,0,0,0,0]);
-  let sc  = $state([0,0,0,0,0]);
+  let code_len = $state(8);
+  let c2c = $state([0,0,0,0,0,0,0,0]);
+  let sc  = $state([0,0,0,0,0,0,0,0]);
 
   let is_running = $state(false);
   let is_relative = $state("relative");
   let insn_value = $state(0);
-  let insn_limit = $state(10);
+  let insn_limit = $state(100);
 
   run_program(i2c, c2c, true);
 
@@ -99,6 +70,10 @@
           break;
       }
 
+      if (c2c == sc.toString() && !is_c2c) {
+        console.log('you win!')
+      }
+
       // wait for realism
       //if (!is_c2c) {
       await new Promise(r => setTimeout(r, 200));
@@ -114,7 +89,7 @@
   }
 
   function reset() {
-    sc = [0,0,0,0,0];
+    sc = [0,0,0,0,0,0,0,0];
     cursor = 0;
   }
 
@@ -161,9 +136,9 @@
     </div>
 
     <div class="flex flex-row">
-      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == "relative" ? 'bg-stone-200!' : ''}`} onclick={is_relative = "relative"}><UserRound />relative</button>
-      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == "absolute" ? 'bg-stone-200!' : ''}`} onclick={is_relative = "absolute"}><Crosshair />absolute</button>
-      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == "value" ? 'bg-stone-200!' : ''}`} onclick={is_relative = "value"}><PlusCircleIcon />value IF YOU ARE READING THIS YOU WILL BE POSSESSED BY AN EVIL SPIRIT</button>
+      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == "relative" ? 'bg-stone-200!' : ''}`} onclick={() => is_relative = "relative"}><UserRound />relative</button>
+      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == "absolute" ? 'bg-stone-200!' : ''}`} onclick={() => is_relative = "absolute"}><Crosshair />absolute</button>
+      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == "value" ? 'bg-stone-200!' : ''}`} onclick={() => is_relative = "value"}><PlusCircleIcon />value</button>
       <label class="bg-stone-500 m-1 p-1 rounded-sm label">
         <span class="label-text">value</span>
         <input type="number" class="input" bind:value={insn_value} placeholder="enter value" />
