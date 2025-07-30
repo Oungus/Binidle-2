@@ -61,7 +61,6 @@
   async function run_program(insns, code, is_c2c) {
     // loop through instructions
     for (let i = 0; i < insns.length; i++) {
-      console.log(insns[i]['operator'])
       let pos = 0;
       if (insns[i]['relative'] != null) {
         pos = (cursor + insns[i]['relative']) % c2c.length;
