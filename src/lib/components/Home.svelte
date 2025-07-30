@@ -1,5 +1,5 @@
 <script>
-  import { Play, Pause, StepForward, StepBack, Repeat, X, ArrowLeftRight, Ampersand, SplinePointer } from '@lucide/svelte';
+  import { Play, Pause, StepForward, StepBack, Repeat, X, ArrowLeftRight, Ampersand, SplinePointer, Trash2, UserRound, Crosshair } from '@lucide/svelte';
 
   let instructions = $state([
     {
@@ -55,8 +55,26 @@
   let sc  = $state([0,0,0,0,0]);
 
   let is_running = $state(false);
+  let is_relative = $state(true);
+  let insn_value = $state(0);
 
   run_program(i2c, c2c, true);
+
+  function add_insn(insn_element) {
+    console.log(insn_element.target)
+    let insn_operator = insn_element.target.children[0].classList.values().find((x) => x.endsWith('-insn')).split('-')[0];
+    instructions.push({
+      "operator": insn_operator,
+      "relative": is_relative ? insn_value : null,
+      "absolute": is_relative ? null : insn_value
+    });
+  }
+
+  function del_insn(idx) {
+    return () => {
+      instructions.splice(idx, 1)
+    };
+  }
   
   async function run_program(insns, code, is_c2c) {
     // loop through instructions
@@ -131,17 +149,26 @@
   <div class="card w-full max-w-md bg-stone-400 preset-filled-surface-100-900 p-4 text-center">
     <pre class="pre">instructions</pre>
 
-    <div class="flex flex-row">
+    <div class="flex flex-row overflow-x-auto">
       {#each instructions as insn, idx}
-        <pre class={`pre m-auto`}>{insn['operator'] + (insn['relative'] != null ? `{${insn['relative']}}` : (insn['absolute'] != null ? `[${insn['absolute']}]` : ''))}</pre>
+        <pre class={`pre p-2 m-2 overflow-x-clip`}><button onclick={del_insn(idx)}><Trash2 class="p-1" /></button>{insn['operator'] + (insn['relative'] != null ? `{${insn['relative']}}` : (insn['absolute'] != null ? `[${insn['absolute']}]` : ''))}</pre>
       {/each}
     </div>
 
     <div class="flex flex-row">
-      <button onclick={add_insn}><X class="x-insn" /></button>
-      <button onclick={add_insn}><ArrowLeftRight /></button>
-      <button onclick={add_insn}><Ampersand /></button>
-      <button onclick={add_insn}><SplinePointer /></button>
+      <button class="bg-stone-500 m-1 p-1 rounded-sm" onclick={add_insn}><X class="pointer-events-none x-insn m-auto" />xor</button>
+      <button class="bg-stone-500 m-1 p-1 rounded-sm" onclick={add_insn}><ArrowLeftRight class="pointer-events-none m-insn m-auto" />move</button>
+      <button class="bg-stone-500 m-1 p-1 rounded-sm" onclick={add_insn}><Ampersand class="pointer-events-none a-insn m-auto" />and</button>
+      <button class="bg-stone-500 m-1 p-1 rounded-sm" onclick={add_insn}><SplinePointer class="pointer-events-none o-insn m-auto" />or</button>
+    </div>
+
+    <div class="flex flex-row">
+      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == true ? 'bg-stone-200!' : ''}`} onclick={is_relative = true}><UserRound />relative</button>
+      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == false ? 'bg-stone-200!' : ''}`} onclick={is_relative = false}><Crosshair />absolute</button>
+      <label class="bg-stone-500 m-1 p-1 rounded-sm label">
+        <span class="label-text">value</span>
+        <input type="number" class="input" bind:value={insn_value} placeholder="enter value" />
+      </label>
     </div>
   </div>
 
