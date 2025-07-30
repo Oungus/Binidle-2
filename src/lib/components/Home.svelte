@@ -1,5 +1,5 @@
 <script>
-  import { Play, Pause, StepForward, StepBack, Repeat, X, ArrowLeftRight, Ampersand, SplinePointer, Trash2, UserRound, Crosshair } from '@lucide/svelte';
+  import { Play, Pause, StepForward, StepBack, Repeat, X, ArrowLeftRight, Ampersand, SplinePointer, Trash2, UserRound, Crosshair, PlusCircleIcon } from '@lucide/svelte';
 
   let instructions = $state([]);
   let cursor = $state(0);
@@ -7,50 +7,61 @@
     {
       "operator": "x",
       "relative": null,
-      "absolute": null
-    },
-    {
-      "operator": "m",
-      "relative": 3,
-      "absolute": null
-    },
-    {
-      "operator": "a",
-      "relative": null,
-      "absolute": 4
+      "absolute": null,
+      "value": 0
     },
     {
       "operator": "m",
       "relative": 3,
       "absolute": null,
+      "value": null
+    },
+    {
+      "operator": "a",
+      "relative": null,
+      "absolute": 4,
+      "value": null
+    },
+    {
+      "operator": "m",
+      "relative": 3,
+      "absolute": null,
+      "value": null
     },
     {
       "operator": "x",
       "relative": null,
-      "absolute": null
+      "absolute": null,
+      "value": 1
     },
     {
       "operator": "m",
       "relative": 1,
       "absolute": null,
+      "value": null
     },
   ]);
   let c2c = $state([0,0,0,0,0]);
   let sc  = $state([0,0,0,0,0]);
 
   let is_running = $state(false);
-  let is_relative = $state(true);
+  let is_relative = $state("relative");
   let insn_value = $state(0);
+  let insn_limit = $state(10);
 
   run_program(i2c, c2c, true);
 
   function add_insn(insn_element) {
     console.log(insn_element.target)
+    if (instructions.length >= insn_limit) {
+      return;
+    }
     let insn_operator = insn_element.target.children[0].classList.values().find((x) => x.endsWith('-insn')).split('-')[0];
     instructions.push({
       "operator": insn_operator,
-      "relative": is_relative ? insn_value : null,
-      "absolute": is_relative ? null : insn_value
+      "relative": is_relative == "relative" ? insn_value : null,
+      "absolute": is_relative == "absolute" ? insn_value : null,
+      "value": is_relative == "value" ? insn_value : null
     });
   }
 
@@ -64,24 +75,27 @@
     // loop through instructions
     for (let i = 0; i < insns.length; i++) {
       let pos = 0;
+      let val = null;
       if (insns[i]['relative'] != null) {
         pos = (cursor + insns[i]['relative']) % c2c.length;
+      } else if (insns[i]['absolute'] == null ){
+        val = insns[i]['value'];
       } else {
         pos = insns[i]['absolute'] % c2c.length;
       }
 
       switch (insns[i]['operator']) {
         case 'x':
-          code[cursor] ^= 1;
+          code[cursor] ^= val || code[pos];
           break;
         case 'm':
           cursor = pos;
           break;
         case 'a':
-          code[cursor] &= code[pos];
+          code[cursor] &= val || code[pos];
           break;
         case 'o':
-          code[cursor] |= code[pos];
+          code[cursor] |= val || code[pos];
           break;
       }
 
@@ -135,7 +149,7 @@
 
     <div class="flex flex-row overflow-x-auto">
       {#each instructions as insn, idx}
-        <pre class={`pre p-2 m-2 overflow-x-clip`}><button onclick={del_insn(idx)}><Trash2 class="p-1" /></button>{insn['operator'] + (insn['relative'] != null ? `{${insn['relative']}}` : (insn['absolute'] != null ? `[${insn['absolute']}]` : ''))}</pre>
+        <pre class={`pre p-2 m-2 overflow-x-clip`}><button onclick={del_insn(idx)}><Trash2 class="p-1" /></button>{insn['operator'] + (insn['relative'] != null ? `{${insn['relative']}}` : (insn['absolute'] != null ? `[${insn['absolute']}]` : `(${insn['value']})`))}</pre>
       {/each}
     </div>
 
@@ -147,8 +161,9 @@
     </div>
 
     <div class="flex flex-row">
-      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == true ? 'bg-stone-200!' : ''}`} onclick={is_relative = true}><UserRound />relative</button>
-      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == false ? 'bg-stone-200!' : ''}`} onclick={is_relative = false}><Crosshair />absolute</button>
+      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == "relative" ? 'bg-stone-200!' : ''}`} onclick={is_relative = "relative"}><UserRound />relative</button>
+      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == "absolute" ? 'bg-stone-200!' : ''}`} onclick={is_relative = "absolute"}><Crosshair />absolute</button>
+      <button class={`bg-stone-500 m-1 p-1 rounded-sm ${is_relative == "value" ? 'bg-stone-200!' : ''}`} onclick={is_relative = "value"}><PlusCircleIcon />value IF YOU ARE READING THIS YOU WILL BE POSSESSED BY AN EVIL SPIRIT</button>
       <label class="bg-stone-500 m-1 p-1 rounded-sm label">
         <span class="label-text">value</span>
         <input type="number" class="input" bind:value={insn_value} placeholder="enter value" />
