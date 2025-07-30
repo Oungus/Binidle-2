@@ -1,23 +1,7 @@
 <script>
   import { Play, Pause, StepForward, StepBack, Repeat, X, ArrowLeftRight, Ampersand, SplinePointer, Trash2, UserRound, Crosshair } from '@lucide/svelte';
 
-  let instructions = $state([
-    {
-      "operator": "x",
-      "relative": null,
-      "absolute": null
-    },
-    {
-      "operator": "m",
-      "relative": 1,
-      "absolute": null
-    },
-    {
-      "operator": "a",
-      "relative": null,
-      "absolute": 4
-    }
-  ]);
+  let instructions = $state([]);
   let cursor = $state(0);
   let i2c = $state([
     {
@@ -134,13 +118,13 @@
 
   <div class="flex flex-row">
     {#each sc as bit, idx}
-      <pre class={`pre m-auto ${idx == cursor ? 'bg-red-400' : ''}`}>{bit}</pre>
+      <pre class={`pre ${idx == cursor ? 'bg-red-400' : ''}`}>{bit}</pre>
     {/each}
   </div>
 
   <div class="flex flex-row">
     {#each c2c as bit, idx}
-      <pre class={`pre m-auto ${idx == cursor ? 'bg-blue-400' : ''}`}>{bit}</pre>
+      <pre class={`pre ${idx == cursor ? 'bg-blue-400' : ''}`}>{bit}</pre>
     {/each}
   </div>
 
@@ -173,15 +157,17 @@
   </div>
 
   <div class="flex flex-row">
-    <StepBack />
+    <div class="card p-2 bg-stone-400 flex m-auto mt-3">
+      <button class="bg-stone-500 rounded-md p-1 ml-1 mr-1"><StepBack /></button>
       {#if is_running}
-      <Pause />
+        <button class="bg-stone-500 rounded-md p-1 ml-1 mr-1"><Pause /></button>
       {:else}
-      <button onclick={toggle_program}>
-        <Play />
-      </button>
+        <button class="bg-stone-500 rounded-md p-1 ml-1 mr-1" onclick={toggle_program}>
+          <Play />
+        </button>
       {/if}
-    <StepForward />
-    <button onclick={reset}><Repeat /></button>
+      <button class="bg-stone-500 rounded-md p-1 ml-1 mr-1"><StepForward /></button>
+      <button class="bg-stone-500 rounded-md p-1 ml-1 mr-1" onclick={reset}><Repeat /></button>
+    </div>
   </div>
 </div>
